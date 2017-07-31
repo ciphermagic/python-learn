@@ -1,0 +1,9 @@
+.idea
+.scrapy
+**/__pycache__/**
+__pycache__
+/itchat_test/*.pkl
+*.pkl
+**/full/**
+/ArticleSpider/ArticleSpider/utils/captcha.jpg
+/ArticleSpider/ArticleSpider/utils/cookies.txt
