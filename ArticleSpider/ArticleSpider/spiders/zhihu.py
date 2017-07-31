@@ -11,17 +11,11 @@ class ZhihuSpider(scrapy.Spider):
     name = "zhihu"
     allowed_domains = ["www.zhihu.com"]
     start_urls = ['http://www.zhihu.com/']
-    headers = {
-        "Host": "www.zhihu.com",
-        "Referer": "https://www.zhihu.com/",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36",
-    }
 
     def start_requests(self):
         return [scrapy.Request(
             url="https://www.zhihu.com/#signin",
             callback=self.login,
-            headers=self.headers,
         )]
 
     def login(self, response):
@@ -35,14 +29,12 @@ class ZhihuSpider(scrapy.Spider):
                 "_xsrf": xsrf,
                 "email": settings.ZHIHU_USER,
                 "password": settings.ZHIHU_PASSWD,
-                # "captcha": get_captcha(),
                 "captcha_type": "cn",
             }
             t = str(int(time.time() * 1000))
             captcha_url = "https://www.zhihu.com/captcha.gif?r={0}&type=login&lang=cn".format(t)
             return [scrapy.Request(
                 url=captcha_url,
-                headers=self.headers,
                 callback=self.login_after_captcha,
                 meta={"post_data": post_data}
             )]
@@ -66,7 +58,6 @@ class ZhihuSpider(scrapy.Spider):
         return [scrapy.FormRequest(
             url="https://www.zhihu.com/login/email",
             formdata=post_data,
-            headers=self.headers,
             callback=self.check_login
         )]
 
@@ -76,7 +67,7 @@ class ZhihuSpider(scrapy.Spider):
         if "msg" in text_json and text_json["msg"] == "登录成功":
             print("登录成功")
             for url in self.start_urls:
-                yield scrapy.Request(url=url, headers=self.headers, dont_filter=True)
+                yield scrapy.Request(url=url, dont_filter=True)
         else:
             print("登录失败")
 

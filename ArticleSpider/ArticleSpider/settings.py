@@ -40,10 +40,9 @@ ROBOTSTXT_OBEY = False
 # TELNETCONSOLE_ENABLED = False
 
 # Override the default request headers:
-# DEFAULT_REQUEST_HEADERS = {
-#   'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-#   'Accept-Language': 'en',
-# }
+DEFAULT_REQUEST_HEADERS = {
+   "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36",
+}
 
 # Enable or disable spider middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
@@ -70,8 +69,8 @@ ITEM_PIPELINES = {
     'ArticleSpider.pipelines.ArticleImagesPipeline': 1,
 }
 IMAGES_URLS_FIELD = 'front_image_url'
-project_dir = os.path.abspath(os.path.dirname(__file__))
-IMAGES_STORE = os.path.join(project_dir, 'images')
+PROJECT_DIR = os.path.abspath(os.path.dirname(__file__))
+IMAGES_STORE = os.path.join(PROJECT_DIR, 'images')
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
@@ -100,4 +99,4 @@ MYSQL_USER = "root"
 MYSQL_PASSWORD = "root"
 
 ZHIHU_USER = "ciphermagic@yeah.net"
-ZHIHU_PASSWD = "XXX"
+ZHIHU_PASSWD = "xxx"
