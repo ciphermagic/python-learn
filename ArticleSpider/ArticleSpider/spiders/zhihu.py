@@ -5,6 +5,7 @@ import re
 import json
 import time
 from zheye import zheye
+from urllib import parse
 
 
 class ZhihuSpider(scrapy.Spider):
@@ -72,7 +73,22 @@ class ZhihuSpider(scrapy.Spider):
             print("登录失败")
 
     def parse(self, response):
-        pass
+        all_urls = response.css("a::attr(href)").extract()
+        all_urls = [parse.urljoin(response.url, url) for url in all_urls]
+        all_urls = filter(lambda x: True if x.startswith("https") else False, all_urls)
+        total = 0
+        for url in all_urls:
+            match_obj = re.match("(.*zhihu.com/question/(\d+))(/|$).*", url)
+            if match_obj:
+                request_url = match_obj.group(1)
+                question_id = match_obj.group(2)
+                total = total + 1
+                # yield scrapy.Request(
+                #     url=request_url,
+                #     meta={"question_id": question_id},
+                #     callback=self.parse_question
+                # )
+        print(total)
 
-    def parse_detail(self, response):
+    def parse_question(self, response):
         pass

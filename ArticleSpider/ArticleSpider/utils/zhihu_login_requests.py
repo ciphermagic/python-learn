@@ -96,5 +96,5 @@ if __name__ == "__main__":
     if is_login():
         print("登陆成功")
     else:
-        zhihu_login("ciphermagic@yeah.net", "xxx")
+        zhihu_login("ciphermagic@yeah.net", "XXX")
         print(is_login())

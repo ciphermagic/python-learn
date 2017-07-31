@@ -100,3 +100,6 @@ MYSQL_PASSWORD = "root"
 
 ZHIHU_USER = "ciphermagic@yeah.net"
 ZHIHU_PASSWD = "xxx"
+
+SQL_DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
+SQL_DATE_FORMAT = "%Y-%m-%d"
