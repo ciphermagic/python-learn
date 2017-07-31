@@ -98,3 +98,6 @@ MYSQL_HOST = "localhost"
 MYSQL_DBNAME = "article_spider"
 MYSQL_USER = "root"
 MYSQL_PASSWORD = "root"
+
+ZHIHU_USER = "ciphermagic@yeah.net"
+ZHIHU_PASSWD = "XXX"
