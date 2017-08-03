@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import datetime
 from scrapy.http import Request
 from urllib import parse
 from ArticleSpider.items import JobBoleArticleItem, ArticleItemLoader

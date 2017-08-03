@@ -9,17 +9,8 @@ import re
 import scrapy
 import datetime
 from scrapy.loader import ItemLoader
-from scrapy.loader.processors import MapCompose, TakeFirst
+from scrapy.loader.processors import MapCompose, TakeFirst, Join
 from ArticleSpider import settings
-
-
-# from utils.common import extract_num
-
-
-# class ArticlespiderItem(scrapy.Item):
-#     # define the fields for your item here like:
-#     # name = scrapy.Field()
-#     pass
 
 
 # 日期转换
@@ -41,6 +32,7 @@ def get_nums(value):
     return nums
 
 
+# 直接返回值
 def return_value(value):
     return value
 
@@ -61,6 +53,7 @@ class TagsJoin(object):
         return self.separator.join(values)
 
 
+# 伯乐文章Item
 class JobBoleArticleItem(scrapy.Item):
     title = scrapy.Field()
     url = scrapy.Field()
@@ -87,100 +80,160 @@ class JobBoleArticleItem(scrapy.Item):
     )
 
     def get_insert_sql(self):
-        insert_sql = """
-            INSERT INTO jobbole_article(
-                url_object_id, 
-                title, 
-                url, 
-                create_date, 
-                fav_nums, 
-                front_image_url, 
-                front_image_path,
-                praise_nums, 
-                comment_nums, 
-                tags, 
-                content
-            )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) 
-            ON DUPLICATE KEY UPDATE 
-                content=VALUES(content), 
-                comment_nums=VALUES(comment_nums), 
-                fav_nums=VALUES(fav_nums), 
-                praise_nums=VALUES(praise_nums)
-        """
-        fron_image_url = ""
-        if self["front_image_url"]:
-            fron_image_url = self["front_image_url"][0]
+        front_image_url = self["front_image_url"][0] if self["front_image_url"] else ""
         params = (
             self["url_object_id"],
             self["title"],
             self["url"],
             self["create_date"],
             self["fav_nums"],
-            fron_image_url,
+            front_image_url,
             self["front_image_path"],
             self["praise_nums"],
             self["comment_nums"],
             self["tags"],
             self["content"]
         )
-        return insert_sql, params
+        return jobbole_sql, params
 
 
+# 知乎问题Item
 class ZhihuQuestionItem(scrapy.Item):
-    # 知乎的问题 item
     zhihu_id = scrapy.Field()
-    topics = scrapy.Field()
     url = scrapy.Field()
-    title = scrapy.Field()
+    crawl_time = scrapy.Field()
+    topics = scrapy.Field(
+        output_processor=Join(",")
+    )
+    title = scrapy.Field(
+        output_processor=Join("")
+    )
+    content = scrapy.Field(
+        output_processor=Join("")
+    )
+    answer_num = scrapy.Field(
+        input_processor=MapCompose(get_nums)
+    )
+    comments_num = scrapy.Field(
+        input_processor=MapCompose(get_nums)
+    )
+    watch_user_num = scrapy.Field(
+        input_processor=MapCompose(get_nums)
+    )
+    click_num = scrapy.Field(
+        input_processor=MapCompose(get_nums)
+    )
+
+    def get_insert_sql(self):
+        params = (
+            self["zhihu_id"],
+            self["topics"],
+            self["url"],
+            self["title"],
+            self["content"],
+            self["answer_num"],
+            self["comments_num"],
+            self["watch_user_num"],
+            self["click_num"],
+            self["crawl_time"].strftime(settings.SQL_DATETIME_FORMAT),
+        )
+        return zhihu_question_sql, params
+
+
+# 知乎回答Item
+class ZhihuAnswerItem(scrapy.Item):
+    zhihu_id = scrapy.Field()
+    url = scrapy.Field()
+    question_id = scrapy.Field()
+    author_id = scrapy.Field()
     content = scrapy.Field()
-    answer_num = scrapy.Field()
+    parise_num = scrapy.Field()
     comments_num = scrapy.Field()
-    watch_user_num = scrapy.Field()
-    click_num = scrapy.Field()
+    create_time = scrapy.Field()
+    update_time = scrapy.Field()
     crawl_time = scrapy.Field()
 
     def get_insert_sql(self):
-        # 插入知乎question表的sql语句
-        insert_sql = """
-            INSERT INTO zhihu_question(
-                zhihu_id, 
-                topics, 
-                url, 
-                title, 
-                content, 
-                answer_num, 
-                comments_num,
-                watch_user_num, 
-                click_num, 
-                crawl_time
-            )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            ON DUPLICATE KEY UPDATE 
-                content=VALUES(content), 
-                answer_num=VALUES(answer_num), 
-                comments_num=VALUES(comments_num),
-                watch_user_num=VALUES(watch_user_num), 
-                click_num=VALUES(click_num)
-        """
-        zhihu_id = self["zhihu_id"][0]
-        topics = ",".join(self["topics"])
-        url = self["url"][0]
-        title = "".join(self["title"])
-        content = "".join(self["content"])
-        # answer_num = extract_num("".join(self["answer_num"]))
-        # comments_num = extract_num("".join(self["comments_num"]))
+        create_time = datetime.datetime.fromtimestamp(self["create_time"]).strftime(settings.SQL_DATETIME_FORMAT)
+        update_time = datetime.datetime.fromtimestamp(self["update_time"]).strftime(settings.SQL_DATETIME_FORMAT)
+        params = (
+            self["zhihu_id"],
+            self["url"],
+            self["question_id"],
+            self["author_id"],
+            self["content"],
+            self["parise_num"],
+            self["comments_num"],
+            create_time,
+            update_time,
+            self["crawl_time"].strftime(settings.SQL_DATETIME_FORMAT),
+        )
+        return zhihu_answer_sql, params
 
-        if len(self["watch_user_num"]) == 2:
-            watch_user_num = int(self["watch_user_num"][0])
-            click_num = int(self["watch_user_num"][1])
-        else:
-            watch_user_num = int(self["watch_user_num"][0])
-            click_num = 0
 
-        crawl_time = datetime.datetime.now().strftime(settings.SQL_DATETIME_FORMAT)
+# 伯乐文章新增SQL
+jobbole_sql = """
+    INSERT INTO jobbole_article(
+        url_object_id, 
+        title, 
+        url, 
+        create_date, 
+        fav_nums, 
+        front_image_url, 
+        front_image_path,
+        praise_nums, 
+        comment_nums, 
+        tags, 
+        content
+    )
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) 
+    ON DUPLICATE KEY UPDATE 
+        content=VALUES(content), 
+        comment_nums=VALUES(comment_nums), 
+        fav_nums=VALUES(fav_nums), 
+        praise_nums=VALUES(praise_nums)
+"""
 
-        # params = (zhihu_id, topics, url, title, content, answer_num, comments_num,
-        #         watch_user_num, click_num, crawl_time)
+# 知乎问题新增SQL
+zhihu_question_sql = """
+    INSERT INTO zhihu_question(
+        zhihu_id, 
+        topics, 
+        url, 
+        title, 
+        content, 
+        answer_num, 
+        comments_num,
+        watch_user_num, 
+        click_num, 
+        crawl_time
+    )
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    ON DUPLICATE KEY UPDATE 
+        content=VALUES(content), 
+        answer_num=VALUES(answer_num), 
+        comments_num=VALUES(comments_num),
+        watch_user_num=VALUES(watch_user_num), 
+        click_num=VALUES(click_num)
+"""
 
-        # return insert_sql, params
+# 知乎回答新增SQL
+zhihu_answer_sql = """
+    INSERT INTO zhihu_answer(
+        zhihu_id, 
+        url, 
+        question_id, 
+        author_id, 
+        content, 
+        parise_num, 
+        comments_num,
+        create_time, 
+        update_time, 
+        crawl_time
+      ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+      ON DUPLICATE KEY UPDATE 
+        content=VALUES(content), 
+        comments_num=VALUES(comments_num), 
+        parise_num=VALUES(parise_num),
+        update_time=VALUES(update_time)
+"""

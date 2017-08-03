@@ -16,11 +16,6 @@ import MySQLdb.cursors
 from twisted.enterprise import adbapi
 
 
-class ArticlespiderPipeline(object):
-    def process_item(self, item, spider):
-        return item
-
-
 # 存储item到MySQL中
 class MysqlPipeline(object):
     def __init__(self):
@@ -28,14 +23,7 @@ class MysqlPipeline(object):
         self.cursor = self.conn.cursor()
 
     def process_item(self, item, spider):
-        insert_sql = """
-                    INSERT INTO jobbole_article(
-                      title,
-                      create_date,
-                      url,
-                      fav_nums
-                    ) VALUES(%s,%s,%s,%s)
-                """
+        insert_sql = item.get_insert_sql()
         self.cursor.execute(insert_sql, (
             item['title'],
             item['create_date'],
