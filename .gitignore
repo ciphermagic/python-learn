@@ -8,3 +8,6 @@ __pycache__
 /ArticleSpider/ArticleSpider/utils/captcha.jpg
 /ArticleSpider/ArticleSpider/utils/cookies.txt
 /ArticleSpider/captcha.jpg
+**/checkpoint
+**/*.pickle
+**/*.ckpt.*
