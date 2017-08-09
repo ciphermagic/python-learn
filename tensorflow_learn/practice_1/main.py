@@ -1,3 +1,4 @@
+# tensorflow 对电影评论进行分类
 import os
 import numpy as np
 import tensorflow as tf
@@ -71,12 +72,16 @@ def normalize_dataset(inner_lex):
     with open(pos_file, 'r') as f:
         lines = f.readlines()
         for line in lines:
-            one_sample = [word_to_vector(inner_lex, line), [1, 0]]
+            t = np.zeros(2)
+            t[0] = 1
+            one_sample = [word_to_vector(inner_lex, line), t]
             ds.append(one_sample)
     with open(neg_file, 'r') as f:
         lines = f.readlines()
         for line in lines:
-            one_sample = [word_to_vector(inner_lex, line), [0, 1]]
+            t = np.zeros(2)
+            t[1] = 1
+            one_sample = [word_to_vector(inner_lex, line), t]
             ds.append(one_sample)
 
     # print(len(ds))
@@ -136,6 +141,7 @@ def neural_network(_lex, data):
 def train_neural_network(has_dataset):
     _lex, _dataset = clear_up(has_dataset)
     _dataset = np.array(_dataset)
+
     x = tf.placeholder('float', [None, len(_dataset[0][0])])
     y = tf.placeholder('float')
 
@@ -163,7 +169,7 @@ def train_neural_network(has_dataset):
                 _, c = session.run([optimizer, cost_func], feed_dict={x: list(batch_x), y: list(batch_y)})
                 epoch_loss += c
                 i += batch_size
-            print(epoch, ' : ', epoch_loss)  #
+            print(epoch, ' : ', epoch_loss)
 
         text_x = _dataset[:, 0]
         text_y = _dataset[:, 1]
@@ -190,6 +196,7 @@ def prediction(text):
 
 if __name__ == "__main__":
     # 训练模型
-    train_neural_network(False)
+    # train_neural_network(False)
     # 预测结果
-    # print(prediction("very good"))
+    print(prediction("very good"))
+    pass

@@ -11,3 +11,7 @@ __pycache__
 **/checkpoint
 **/*.pickle
 **/*.ckpt.*
+/tensorflow_learn/mnist/data/*.idx3-ubyte
+/tensorflow_learn/mnist/data/*.idx1-ubyte
+/tensorflow_learn/practice_3/data/*.idx3-ubyte
+/tensorflow_learn/practice_3/data/*.idx1-ubyte
