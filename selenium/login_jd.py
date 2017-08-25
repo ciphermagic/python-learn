@@ -12,7 +12,7 @@ password = "********"
 driver.get("https://passport.jd.com/new/login.aspx")
 driver.find_element_by_class_name("login-tab-r").click()
 elem_account = driver.find_element_by_name("loginname")
-elem_password = driver.find_element_by_name("nloginpwd")
+elem_password = driver.find_element_by_name("loginpwd")
 elem_account.clear()
 elem_password.clear()
 elem_account.send_keys(name)
