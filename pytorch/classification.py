@@ -10,22 +10,30 @@ x0 = torch.normal(2 * n_data, 1)  # 类型0 x data (tensor), shape=(100, 2)
 y0 = torch.zeros(100)  # 类型0 y data (tensor), shape=(100, 1)
 x1 = torch.normal(-2 * n_data, 1)  # 类型1 x data (tensor), shape=(100, 2)
 y1 = torch.ones(100)  # 类型1 y data (tensor), shape=(100, 1)
-x2 = torch.normal(4 * n_data, 1)
-y2 = torch.ones(100) + torch.ones(100)
 
 # 注意 x, y 数据的数据形式是一定要像下面一样 (torch.cat 是在合并数据)
 # x：数据点，y：颜色值
-x = torch.cat((x0, x1, x2)).type(torch.FloatTensor)  # FloatTensor = 32-bit floating
-y = torch.cat((y0, y1, y2)).type(torch.LongTensor)  # LongTensor = 64-bit integer
+x = torch.cat((x0, x1)).type(torch.FloatTensor)  # FloatTensor = 32-bit floating
+y = torch.cat((y0, y1)).type(torch.LongTensor)  # LongTensor = 64-bit integer
 
 # torch 只能在 Variable 上训练, 所以把它们变成 Variable
 x, y = Variable(x), Variable(y)
+
+'''
+ 数据示例：
+ x:                y:
+ 2.5441  4.3532    0
+ 2.9547  1.3931    0
+ 3.7480  1.5103    0
+ 2.4432  2.3133    1
+ 1.3934  3.5953    1
+ 0.7010  1.7606    1
+'''
 
 
 # 画图
 # plt.scatter(x.data.numpy()[:, 0], x.data.numpy()[:, 1], c=y.data.numpy())
 # plt.show()
-
 
 # 建立神经网络
 # 建立一个神经网络我们可以直接运用 torch 中的体系.
@@ -46,13 +54,22 @@ class Net(torch.nn.Module):  # 继承 torch 的 Module
 
 
 # 几个类别就几个 output
-net = Net(n_feature=2, n_hidden=30, n_output=3)
+# net = Net(n_feature=2, n_hidden=20, n_output=2)
 
-optimizer = torch.optim.SGD(net.parameters(), lr=0.1)
+net = torch.nn.Sequential(
+    torch.nn.Linear(2, 20),
+    torch.nn.ReLU(),
+    torch.nn.Linear(20, 2)
+)
+
+optimizer = torch.optim.SGD(net.parameters(), lr=0.005)
 # 交叉熵损失函数
+# **我的理解**：损失函数会根据预测值的维度，与y中不同的值对应，
+# 例如预测值有2个维度，y中必须有且只有2个不同的值，
+# 这两个值对应的是预测值中两个维度的索引值，就是0和1
 loss_func = torch.nn.CrossEntropyLoss()
 
-for t in range(200):
+for t in range(100):
     prediction = net(x)
     # prediction 是二维的，y 是一维的
     loss = loss_func(prediction, y)
@@ -66,14 +83,15 @@ for t in range(200):
         plt.cla()
         # 取 prediction 每一维中最大的数，的索引值
         prediction = torch.max(prediction, 1)[1]
+        # prediction = torch.max(F.softmax(prediction), 1)[1]  # 通过一层 softmax 过滤
         pred_y = prediction.data.numpy()
         target_y = y.data.numpy()
         plt.scatter(x.data.numpy()[:, 0], x.data.numpy()[:, 1], c=pred_y)
         # 预测值与真实值相同的个数的总和
         sum_y = sum(pred_y == target_y)
-        accuracy = sum_y / 300  # 预测中有多少和真实值一样
-        plt.text(1.5, -4, 'Accuracy=%.2f\nt=%d' % (accuracy, t))
-        if t == 198:
+        accuracy = sum_y / 200  # 预测中有多少和真实值一样
+        plt.text(1.5, -4, 'Accuracy=%.2f\nt=%d\nloss=%.4f' % (accuracy, t, loss.data[0]))
+        if t == 98:
             plt.text(0, 0, 'done')
         plt.pause(0.1)
 
