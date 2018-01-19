@@ -16,3 +16,5 @@ __pycache__
 /tensorflow_learn/practice_3/data/*.idx3-ubyte
 /tensorflow_learn/practice_3/data/*.idx1-ubyte
 output
+/pytorch/mnist/**
+/test/mnist/**

@@ -38,6 +38,7 @@ class Net(torch.nn.Module):  # 继承 torch 的 Module
     def __init__(self, n_feature, n_hidden, n_output):
         super(Net, self).__init__()  # 继承 __init__ 功能
         # 定义每层用什么样的形式
+        # nn.Linear表示的是 y=w*x+b
         self.hidden = torch.nn.Linear(n_feature, n_hidden)  # 隐藏层线性输出
         self.predict = torch.nn.Linear(n_hidden, n_output)  # 输出层线性输出
 
@@ -48,14 +49,14 @@ class Net(torch.nn.Module):  # 继承 torch 的 Module
         return x
 
 
-# net = Net(n_feature=1, n_hidden=10, n_output=1)
+net = Net(n_feature=1, n_hidden=10, n_output=1)
 
 # 快速搭建：
-net = torch.nn.Sequential(
-    torch.nn.Linear(1, 10),
-    torch.nn.ReLU(),
-    torch.nn.Linear(10, 1)
-)
+# net = torch.nn.Sequential(
+#     torch.nn.Linear(1, 10),
+#     torch.nn.ReLU(),
+#     torch.nn.Linear(10, 1)
+# )
 
 # net 的结构
 # print(net)
