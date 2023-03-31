@@ -19,9 +19,7 @@ if __name__ == '__main__':
         screen_gray = cv2.cvtColor(print_screen, cv2.COLOR_BGR2GRAY)  # 灰度图像收集
         screen_reshape = cv2.resize(screen_gray, (96, 86))
 
-        # cv2.imshow('window1', screen_gray)
-        # cv2.imshow('window2', screen_reshape)
-        cv2.imshow('window3', screen_reshape)
+        cv2.imshow('window3', print_screen)
 
         # 测试时间用
         print('loop took {} seconds'.format(time.time() - last_time))
